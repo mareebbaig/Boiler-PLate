@@ -1,43 +1,64 @@
 module.exports = function SvcTalos(opts) {
     const { svcCache, queryHandler, mdlTest, db } = opts;
-    async function getFromDB(phone) {
+    async function getFromDB() {
         //const token = await svcCache.getKV({ key: 'ELRP_TOKEN' });
-        const result = await db["primary"].query(mdlTest.CreateUsersTable, "");
+        const result = await db["primary"].none(mdlTest.CreatEmpTable);
+        console.log("result: ", result);
         const response = result;
         return response;
     }
 
-    async function insertEmpDataIntoDB({ emp_id, username, review }) {
+    async function insertEmpDataIntoDB({
+        emp_id,
+        username,
+        review,
+        userId,
+        compId,
+    }) {
         const result = await db["primary"].query(mdlTest.InsertEmp, {
-            ID: emp_id,
-            username: username,
-            review: review,
-            company_name: "areeb",
+            emp_id,
+            username,
+            review,
+            userId,
+            compId,
         });
         console.log(result);
         const response = result;
         return response;
     }
-    async function CreateUser({ username, password, email, company_name }) {
+
+    async function CreateUser({ userId, email, username, password }) {
         const result = await db["primary"].query(mdlTest.InsertUser, {
+            userId,
+            email,
             username,
             password,
-            email,
-            company_name,
         });
         return result;
     }
-    async function InsertCompany({ company_name, city }) {
+
+    async function CompanyDetails({ compId, userId, company_name, city }) {
         const result = await db["primary"].query(mdlTest.InsertCompany, {
+            compId,
             company_name,
             city,
+            userId,
         });
         return result;
     }
-    async function GetUser({ email }) {
+
+    async function GetUser(email) {
         const result = await db["primary"].query(mdlTest.getUser, {
             email,
         });
+        return result;
+    }
+    async function GetCompanyId(userId) {
+        console.log("svc Talos mai : ", userId);
+        const result = await db["primary"].query(mdlTest.GetCompanyId, {
+            userId,
+        });
+        console.log("svc talos mai company Id ", result);
         return result;
     }
 
@@ -52,8 +73,9 @@ module.exports = function SvcTalos(opts) {
         getFromDB,
         insertEmpDataIntoDB,
         CreateUser,
-        InsertCompany,
+        CompanyDetails,
         GetUser,
+        GetCompanyId,
         getReview,
     };
 };

@@ -1,40 +1,72 @@
 const P = require("pino");
 
 module.exports = function AuthRequestHandlers(opts) {
-    const { authMediator } = opts;
+    const { authMediator, uuid, bcrypt } = opts;
 
     async function test(request, reply) {
         const { body } = request;
-        console.log("test");
-        const sent = await authMediator.test({ ...body });
+        console.log("test", body);
+        const sent = await authMediator.test();
         reply.send(JSON.stringify(sent));
     }
+    // signUp
 
+    async function CreateUser(request, response) {
+        const { email, username, password } = request.body;
+        const hashedPassword = await bcrypt.hash(password, 10);
+        console.log("hashed password: ", typeof hashedPassword);
+        const userId = uuid();
+        const res1 = await authMediator.CreateUser({
+            userId,
+            email,
+            username,
+            hashedPassword,
+        });
+        response.send(res1);
+    }
+
+    // insert review
     async function insertEmpDataIntoDB(request, response) {
-        const { body } = request;
-        console.log(body);
+        const { username, review, userId, compId } = request.body;
+        console.log(request.body);
+        const emp_id = uuid();
         const responseFromDB = await authMediator.insertEmpDataIntoDB({
-            ...body,
+            emp_id,
+            username,
+            review,
+            userId,
+            compId,
         });
         response.send(responseFromDB);
     }
 
-    async function CreateUser(request, response) {
-        const { body } = request;
-        const res = await authMediator.InsertCompany({ ...body });
-        const res1 = await authMediator.CreateUser({ ...body });
-        response.send(res1);
+    async function CompanyDetails(request, response) {
+        const { company_name, city, userId } = request.body;
+        const compId = uuid();
+        const res = await authMediator.CompanyDetails({
+            compId,
+            company_name,
+            city,
+            userId,
+        });
+        response.send(res);
     }
 
     async function CheckUser(request, response) {
-        console.log("yahan agya hai");
         const { email, password } = request.body;
-        const data = await authMediator.GetUser({ email });
+
+        const data = await authMediator.GetUser(email);
+        console.log("ye aya hai data base se: ", data);
         if (!data.length) {
-            response.send({ error: "User is not registered, Sign Up first" });
+            response.send(data); // response khali return horha hai yahan pe.
         } else {
             if (password === data[0].password) {
-                response.send({ message: "user signed in" });
+                const compId = await authMediator.GetCompanyId(data[0].userid);
+                console.log("companyId : ", compId, data[0].userid);
+                response.send({
+                    userID: data[0].userid,
+                    compId, // company id khali bh aa sakti hai full bh aasskti hai.
+                });
             } else {
                 response.send({ error: "password did not match" });
             }
@@ -51,6 +83,7 @@ module.exports = function AuthRequestHandlers(opts) {
         test,
         insertEmpDataIntoDB,
         CreateUser,
+        CompanyDetails,
         CheckUser,
         getReview,
     };

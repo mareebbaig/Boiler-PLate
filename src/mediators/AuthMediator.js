@@ -1,36 +1,56 @@
 module.exports = function AuthMediator(opts) {
     const { svcTalos } = opts;
 
-    async function test({ username, age }) {
+    async function test() {
         //  number = sanitizePhoneNumber({ phone: number });
-        account = await svcTalos.getFromDB({ username, age });
+        account = await svcTalos.getFromDB();
         return account;
     }
 
-    async function insertEmpDataIntoDB({ emp_id, username, review }) {
-        res = await svcTalos.insertEmpDataIntoDB({ emp_id, username, review });
-        return res;
-    }
-
-    async function GetUser({ email }) {
-        res = await svcTalos.GetUser({ email });
-        return res;
-    }
-
-    async function CreateUser({ username, password, email, company_name }) {
-        res = await svcTalos.CreateUser({
+    async function insertEmpDataIntoDB({
+        emp_id,
+        username,
+        review,
+        userId,
+        compId,
+    }) {
+        res = await svcTalos.insertEmpDataIntoDB({
+            emp_id,
             username,
-            password,
-            email,
-            company_name,
+            review,
+            userId,
+            compId,
         });
         return res;
     }
 
-    async function InsertCompany({ company_name, city }) {
-        res = await svcTalos.InsertCompany({
+    //Login
+    async function GetUser(email) {
+        res = await svcTalos.GetUser(email);
+        return res;
+    }
+    async function GetCompanyId(userId) {
+        console.log("Mediator mai : ", userId);
+        res = await svcTalos.GetCompanyId(userId);
+        return res;
+    }
+
+    async function CreateUser({ userId, email, username, password }) {
+        res = await svcTalos.CreateUser({
+            userId,
+            email,
+            username,
+            password,
+        });
+        return res;
+    }
+
+    async function CompanyDetails({ compId, company_name, city, userId }) {
+        res = await svcTalos.CompanyDetails({
+            compId,
             company_name,
             city,
+            userId,
         });
         return res;
     }
@@ -46,8 +66,9 @@ module.exports = function AuthMediator(opts) {
         test,
         insertEmpDataIntoDB,
         CreateUser,
-        InsertCompany,
+        CompanyDetails,
         GetUser,
+        GetCompanyId,
         getReview,
     };
 };

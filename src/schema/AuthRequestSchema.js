@@ -27,9 +27,10 @@ module.exports = function AuthRequestSchema(opts) {
             method: "POST",
             schema: {
                 body: Joi.object().keys({
-                    emp_id: Joi.string().required(),
                     username: Joi.string().required(),
                     review: Joi.string().required(),
+                    userId: Joi.string().required(),
+                    compId: Joi.string().required(),
                 }),
             },
             url: "/InsertEmpData",
@@ -45,12 +46,22 @@ module.exports = function AuthRequestSchema(opts) {
                     username: Joi.string().required(),
                     password: Joi.string().required(), // agey password hasing k liye use krna hai.
                     email: Joi.string().required().email(),
-                    company_name: Joi.string().required(),
-                    city: Joi.string().required(),
                 }),
             },
             url: "/Signup",
             handler: authRequestHandlers.CreateUser,
+        };
+    };
+
+    const CompanyDetals = () => {
+        return {
+            method: "POST",
+            schema: {
+                company_name: Joi.string().required(),
+                city: Joi.string().required(),
+            },
+            url: "/Signup/CompanyDetails",
+            handler: authRequestHandlers.CompanyDetails,
         };
     };
 
@@ -85,6 +96,7 @@ module.exports = function AuthRequestSchema(opts) {
         reqtest,
         reqInsertEmpData,
         SignUp,
+        CompanyDetals,
         Login,
         getReview,
     };
