@@ -35,12 +35,12 @@ module.exports = function AuthMediator(opts) {
         return res;
     }
 
-    async function CreateUser({ userId, email, username, password }) {
+    async function CreateUser({ userId, email, username, hashedPassword }) {
         res = await svcTalos.CreateUser({
             userId,
             email,
             username,
-            password,
+            hashedPassword,
         });
         return res;
     }
@@ -55,9 +55,13 @@ module.exports = function AuthMediator(opts) {
         return res;
     }
 
-    async function getReview({ company_name }) {
+    async function GetCompanies() {
+        res = await svcTalos.GetCompanies();
+        return res;
+    }
+    async function getReview({ compId }) {
         res = await svcTalos.getReview({
-            company_name,
+            compId,
         });
         return res;
     }
@@ -69,6 +73,7 @@ module.exports = function AuthMediator(opts) {
         CompanyDetails,
         GetUser,
         GetCompanyId,
+        GetCompanies,
         getReview,
     };
 };

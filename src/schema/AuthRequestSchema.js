@@ -79,14 +79,22 @@ module.exports = function AuthRequestSchema(opts) {
         };
     };
 
+    const GetCompanies = () => {
+        return {
+            method: "GET",
+            url: "/getCompnies",
+            handler: authRequestHandlers.GetCompanies,
+        };
+    };
+
     const getReview = () => {
         return {
             method: "POST",
-            schema: {
-                body: Joi.object().keys({
-                    company_name: Joi.string().required(),
-                }),
-            },
+            // schema: {
+            //     body: Joi.object().keys({
+            //         company_name: Joi.string().required(),
+            //     }),
+            // },
             url: "/getReview",
             handler: authRequestHandlers.getReview,
         };
@@ -98,6 +106,7 @@ module.exports = function AuthRequestSchema(opts) {
         SignUp,
         CompanyDetals,
         Login,
+        GetCompanies,
         getReview,
     };
 };

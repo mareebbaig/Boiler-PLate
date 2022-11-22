@@ -16,15 +16,16 @@ module.exports = function MdlTest() {
         // DropCompanyTabel: "drop table company",
 
         InsertUser:
-            "INSERT INTO users(userId, email, username, password) VALUES(${userId} , ${email} , ${username} , ${password}) RETURNING userId",
+            "INSERT INTO users(userId, email, username, password) VALUES(${userId} , ${email} , ${username} , ${hashedPassword}) RETURNING userId, email , username",
         InsertCompany:
-            "INSERT INTO company(compId,company_name,city,userId) VALUES(${compId},${company_name},${city},${userId}) RETURNING compId",
+            "INSERT INTO company(compId,company_name,city,userId) VALUES(${compId},${company_name},${city},${userId}) RETURNING compId, company_name , city",
         InsertEmp:
             "INSERT INTO employees(emp_id,username,review,userId,compId) VALUES(${emp_id}, ${username} , ${review} , ${userId} , ${compId})",
 
         getUser: "SELECT * FROM users WHERE email = ${email}",
         GetCompanyId: "SELECT compId from company WHERE userId = ${userId}",
+        GetCompanies: "SELECT company_name, compId from company",
         getReview:
-            "SELECT * from employees where company_name = ${company_name}",
+            "SELECT username , review from employees where compId = ${compId}",
     };
 };

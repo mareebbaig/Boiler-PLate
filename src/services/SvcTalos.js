@@ -27,12 +27,12 @@ module.exports = function SvcTalos(opts) {
         return response;
     }
 
-    async function CreateUser({ userId, email, username, password }) {
+    async function CreateUser({ userId, email, username, hashedPassword }) {
         const result = await db["primary"].query(mdlTest.InsertUser, {
             userId,
             email,
             username,
-            password,
+            hashedPassword,
         });
         return result;
     }
@@ -53,6 +53,7 @@ module.exports = function SvcTalos(opts) {
         });
         return result;
     }
+
     async function GetCompanyId(userId) {
         console.log("svc Talos mai : ", userId);
         const result = await db["primary"].query(mdlTest.GetCompanyId, {
@@ -62,9 +63,13 @@ module.exports = function SvcTalos(opts) {
         return result;
     }
 
-    async function getReview({ company_name }) {
+    async function GetCompanies() {
+        const result = await db["primary"].query(mdlTest.GetCompanies);
+        return result;
+    }
+    async function getReview({ compId }) {
         const result = await db["primary"].query(mdlTest.getReview, {
-            company_name,
+            compId,
         });
         return result;
     }
@@ -76,6 +81,7 @@ module.exports = function SvcTalos(opts) {
         CompanyDetails,
         GetUser,
         GetCompanyId,
+        GetCompanies,
         getReview,
     };
 };

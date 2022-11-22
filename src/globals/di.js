@@ -6,6 +6,8 @@ const Boom = require("@hapi/boom");
 const _ = require("lodash");
 const uuid = require("uuid");
 const bcrypt = require("bcrypt");
+const jose = require("jose");
+const jwt = require("jsonwebtoken");
 
 const container = awilix.createContainer();
 
@@ -27,6 +29,8 @@ module.exports = async function FastDI(options = {}) {
         _: awilix.asValue(_),
         uuid: awilix.asValue(uuid),
         bcrypt: awilix.asValue(bcrypt),
+        jose: awilix.asValue(jose),
+        jwt: awilix.asValue(jwt),
     });
 
     container.loadModules(

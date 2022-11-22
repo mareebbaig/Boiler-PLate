@@ -1,7 +1,7 @@
 const P = require("pino");
 
 module.exports = function AuthRequestHandlers(opts) {
-    const { authMediator, uuid, bcrypt } = opts;
+    const { authMediator, uuid, bcrypt, jwt, jwtFile } = opts;
 
     async function test(request, reply) {
         const { body } = request;
@@ -10,22 +10,45 @@ module.exports = function AuthRequestHandlers(opts) {
         reply.send(JSON.stringify(sent));
     }
     // signUp
-
     async function CreateUser(request, response) {
         const { email, username, password } = request.body;
         const hashedPassword = await bcrypt.hash(password, 10);
-        console.log("hashed password: ", typeof hashedPassword);
         const userId = uuid();
-        const res1 = await authMediator.CreateUser({
+        const res = await authMediator.CreateUser({
             userId,
             email,
             username,
             hashedPassword,
         });
-        response.send(res1);
+        const secret = Buffer.from(
+            "62197fc8886bd3b739dd2cc8aa109d0be93acdea64c07b8908168b80daf1dc47",
+            "hex"
+        );
+        const payload = {
+            username,
+            email,
+            hashedPassword,
+        };
+        const encryptedJwt = await jwtFile.generateJWT(
+            "testsub",
+            payload,
+            secret
+        );
+        response.send({ res: res[0], jwt: encryptedJwt });
     }
-
+    async function CompanyDetails(request, response) {
+        const { company_name, city, userId } = request.body;
+        const compId = uuid();
+        const res = await authMediator.CompanyDetails({
+            compId,
+            company_name,
+            city,
+            userId,
+        });
+        response.send(res);
+    }
     // insert review
+
     async function insertEmpDataIntoDB(request, response) {
         const { username, review, userId, compId } = request.body;
         console.log(request.body);
@@ -40,18 +63,6 @@ module.exports = function AuthRequestHandlers(opts) {
         response.send(responseFromDB);
     }
 
-    async function CompanyDetails(request, response) {
-        const { company_name, city, userId } = request.body;
-        const compId = uuid();
-        const res = await authMediator.CompanyDetails({
-            compId,
-            company_name,
-            city,
-            userId,
-        });
-        response.send(res);
-    }
-
     async function CheckUser(request, response) {
         const { email, password } = request.body;
 
@@ -60,12 +71,29 @@ module.exports = function AuthRequestHandlers(opts) {
         if (!data.length) {
             response.send(data); // response khali return horha hai yahan pe.
         } else {
-            if (password === data[0].password) {
+            if (bcrypt.compareSync(password, data[0].password)) {
                 const compId = await authMediator.GetCompanyId(data[0].userid);
-                console.log("companyId : ", compId, data[0].userid);
+                const secret = Buffer.from(
+                    "62197fc8886bd3b739dd2cc8aa109d0be93acdea64c07b8908168b80daf1dc47",
+                    "hex"
+                );
+                const payload = {
+                    name: data[0].username,
+                    email: data[0].email,
+                    password: data[0].password,
+                };
+                const encryptedJwt = await jwtFile.generateJWT(
+                    "testsub",
+                    payload,
+                    secret
+                );
                 response.send({
-                    userID: data[0].userid,
-                    compId, // company id khali bh aa sakti hai full bh aasskti hai.
+                    userid: data[0].userid,
+                    username: data[0].username,
+                    email: data[0].email,
+                    compid: compId[0].compid,
+
+                    // JWT: encryptedJwt,
                 });
             } else {
                 response.send({ error: "password did not match" });
@@ -73,9 +101,15 @@ module.exports = function AuthRequestHandlers(opts) {
         }
     }
 
+    async function GetCompanies(request, response) {
+        const data = await authMediator.GetCompanies();
+        response.send(data);
+    }
+
     async function getReview(request, response) {
         const { body } = request;
         const data = await authMediator.getReview({ ...body });
+        console.log("database se ye aya hai: ", data);
         response.send(data);
     }
 
@@ -85,6 +119,7 @@ module.exports = function AuthRequestHandlers(opts) {
         CreateUser,
         CompanyDetails,
         CheckUser,
+        GetCompanies,
         getReview,
     };
 };
